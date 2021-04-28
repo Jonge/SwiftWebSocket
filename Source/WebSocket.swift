@@ -194,7 +194,6 @@ public struct WebSocketService :  OptionSet {
 
 private let atEndDetails = "streamStatus.atEnd"
 private let timeoutDetails = "The operation couldn’t be completed. Operation timed out"
-private let timeoutDuration : CFTimeInterval = 30
 
 public enum WebSocketError : Error, CustomStringConvertible {
     case memory
@@ -1564,6 +1563,10 @@ private enum TCPConnSecurity {
 	}
 }
 
+public enum WebSocketConfiguration {
+  public static var timeoutDuration: CFTimeInterval = 30
+}
+
 // Manager class is used to minimize the number of dispatches and cycle through network events
 // using fewers threads. Helps tremendously with lowing system resources when many conncurrent
 // sockets are opened.
@@ -1605,7 +1608,7 @@ private class Manager {
     func checkForConnectionTimeout(_ ws : InnerWebSocket) {
         if ws.rd != nil && ws.wr != nil && (ws.rd.streamStatus == .opening || ws.wr.streamStatus == .opening) {
             let age = CFAbsoluteTimeGetCurrent() - ws.createdAt
-            if age >= timeoutDuration {
+            if age >= WebSocketConfiguration.timeoutDuration {
                 ws.connectionTimeout = true
             }
         }
